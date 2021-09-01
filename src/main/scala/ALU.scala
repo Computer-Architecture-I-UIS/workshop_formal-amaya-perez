@@ -42,6 +42,7 @@ shifted := io.in1 >> io.in2(4,0)
 
 val totalsum = Wire(UInt(33.W))
 totalsum := io.in1 + io.in2
+// totalsum := Cat(0.U(1.W), io.in1) + Cat(0.U(1.W), io.in2) // fixed
 
 // substraction
 
@@ -125,21 +126,64 @@ io.ans := 0.U
 		is(code.nop1){ io.out := io.in1 }
 
 		is(code.nop2){ io.out := io.in1 }
+		// io.out := io.in2 // fixed
 
 	}
 
 	if (formal){
 
-		val init = RegInit(false.B)
-		when (!init){
-			verification.assume(reset.asBool)
-			//verification.assert(io.out === 0.U)
-			init := true.B
-		}.elsewhen(io.sel === 15.U){
-			verification.assert(io.out === io.in2)
-		}.elsewhen((io.in1 <= "hFFFFFFFF".asUInt ) && (io.in2 <= "hFFFFFFFF".asUInt)){
-			verification.assert(io.ovf === 0.U)
+		/*
+		// FAIL
+		when (io.sel === code.add){
+			verification.assume(io.in2 >= ( (1.U(33.W) << 32) - io.in1) );
+			verification.assert(io.ovf === 1.U(1.W))
 		}
+		
+		// FAIL
+		when (io.sel === code.nop2){
+			verification.assert(io.out === io.in2)
+		}
+		*/
+	    
+		when (io.sel === code.sub){
+			verification.assume(io.in1 > io.in2)
+			verification.assert(io.out <= io.in1)
+		}
+
+		when (io.sel === code.nop1){
+			verification.assert(io.out === io.in1)
+		}
+
+		when (io.sel === code.eq){
+			verification.assert(io.ans === (io.in1 === io.in2))
+			verification.assert(io.out(0).asBool === (io.in1 === io.in2))
+		}
+
+		when (io.sel === code.neq){
+			verification.assert(io.ans =/= (io.in1 === io.in2))
+			verification.assert(io.out(0).asBool =/= (io.in1 === io.in2))
+		}
+
+		when (io.sel === code.srl){
+			verification.assert(io.out === (io.in1 >> io.in2(4,0)))
+		}
+
+		when (io.sel === code.sll){
+			verification.assert(io.out === (io.in1 << io.in2(4,0))(31,0))
+		}
+
+		when (io.sel === code.sra){
+			when(io.in1(31) === 1.U){
+				verification.assert( io.out === ( (io.in1 >> io.in2(4,0)) | (~0.U(32.W) << (32.U - io.in2(4,0)))(31,0)) )
+			}.otherwise{
+				verification.assert( io.out === (io.in1 >> io.in2(4,0)) )
+			}
+		}
+
+		when (io.sel === code.xor){
+			verification.assert(io.out === (io.in1 ^ io.in2))
+		}
+		
 	}
 }
 

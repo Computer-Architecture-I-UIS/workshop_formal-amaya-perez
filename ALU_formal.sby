@@ -2,7 +2,7 @@
 [options]
 mode bmc
 #mode prove #k-induction
-depth 20
+depth 100
 #expect fail
 
 [engines]
