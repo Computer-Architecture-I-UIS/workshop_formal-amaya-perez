@@ -4,7 +4,7 @@
 La ALU es un circuito combinacional el cual por medio de un selector realiza una operación entre dos entradas, estas operaciones pueden ser aritméticas (suma o resta), operaciones bit a bit (xor, or, and), o comparaciones (igual que, mayor que, menor que).
 
 ## Diagrama de bloques.
-![Diagrama](diagrama.png)
+![Diagrama](diagrama.PNG)
 ##  Reglas formales.
 
 | Rule                                                                                                                                                                                                                                                                                           | Assume                                    | Assert                                                                                                                                                                                                          |
